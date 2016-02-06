@@ -165,11 +165,8 @@ unsigned long getTimeFromNTP() {
 
   if(cc3000.getHostByName("pool.ntp.org", &ip)) {
     static const char PROGMEM
-      timeReqA[] = { 
-      227,  0,  6, 236                 }
-    ,
-    timeReqB[] = {  
-      49, 78, 49,  52                 };
+      timeReqA[] = {227,  0,  6, 236},
+    timeReqB[] = {49, 78, 49,  52};
 
     Serial.println(F("\r\nAttempting connection..."));
     startTime = millis();
@@ -270,7 +267,8 @@ void checkIfRequestAndHandleIt(){
         client.fastrprintln(F("Connection: close"));
         client.fastrprintln(F("Server: Adafruit CC3000"));
         client.fastrprintln(F(""));
-        client.fastrprintln("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        client.fastrprintln("");
+
       }
       else {
         client.fastrprintln(F("HTTP/1.1 405 Method Not Allowed"));
