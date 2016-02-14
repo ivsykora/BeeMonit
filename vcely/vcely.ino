@@ -8,7 +8,11 @@
 Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT, SPI_CLOCK_DIVIDER);
 #define WLAN_SSID       "saew"          
 #define WLAN_PASS       "K0y0jedz2"
+#define hashAuth        "oSOxRdge"
 #define WLAN_SECURITY   WLAN_SEC_WPA2
+
+int counter = 0;
+uint32_t ip = 167772196;
 
 Adafruit_CC3000_Client client;
 const unsigned long
@@ -22,81 +26,80 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("loop");
   postRequest();
   delay(5000);
+  counter++;
+
+  System.gc();
 }
 
 void setUpSerial(){
   Serial.begin(115200);
   while(!Serial);
-  Serial.println(F("Serial initialized!"));
 } 
 
 void setUpWifi(){
   if (!cc3000.begin()){
-    Serial.println(F("Couldn't begin()! Check your wiring?"));
     while(1);
   }
 
-  Serial.print(F("\nAttempting to connect to ")); 
-  Serial.println(WLAN_SSID);
   if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
-    Serial.println(F("Failed!"));
     while(1);
   }
-
-  Serial.println(F("Connected!"));
-
-  Serial.println(F("Request DHCP"));
   while (!cc3000.checkDHCP())
   {
     delay(100);
   }
+}
 
-  while (! displayConnectionDetails()) {
-    delay(1000);
-  }  
+void reboot() {
+  if (counter==5) {
+    rebootRequest();
+    void (*reboot)(void) = 0;
+    reboot();
+  }
 }
 
 void postRequest(){
-  uint32_t ip = 167772196;
+  String PostData = "someDataToPostsomeDataToPostsomeDataToPostsomeDataToPostsomeDataToPostsomeDataToPostsomeDataToPostsomeDataToPostsomeDataToPost";
 
-  Serial.println(F("Trying to connect to server."));
   Adafruit_CC3000_Client client = cc3000.connectTCP(ip, 80);
-  if (client.connected()) {
-    Serial.println(F("Connected to server."));
+  client.connected();
+
+  client.println("POST /feed/data HTTP/1.0"); 
+  client.print("X-Auth:");
+  client.println(hashAuth);
+  client.print("Content-Length: ");
+  client.println(PostData.length());
+  client.println();
+  client.println(PostData);
+
+  while(client.connected() && !client.available()) delay(1);
+  while (client.connected() || client.available()) { 
+    client.read();
   }
 
+  client.close();
+}
+
+void rebootRequest(){
+  Adafruit_CC3000_Client client = cc3000.connectTCP(ip, 80);
+  client.connected();
+
   client.println("GET /feed HTTP/1.0"); 
+  client.print("X-Auth:");
+  client.println(hashAuth);
   client.println();
 
   while(client.connected() && !client.available()) delay(1);
   while (client.connected() || client.available()) { 
-    char c = client.read();
-    Serial.print(c);
+    client.read();
   }
 
   client.close();
-  Serial.println(F("Closing connection"));
 }
 
 
-bool displayConnectionDetails(){
-  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
 
-  if(!cc3000.getIPAddress(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv))
-  {
-    Serial.println(F("Unable to retrieve the IP Address!\r\n"));
-    return false;
-  }
-  else
-  {
-    Serial.print(F("\nIP Addr: ")); 
-    cc3000.printIPdotsRev(ipAddress);
-    Serial.println();
-    return true;
-  }
-}
 
 
