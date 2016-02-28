@@ -108,35 +108,17 @@ void postRequest(){
 }
 
 String readDHT(){
-  //floatToString(dht.readTemperature()) + ";" +
-  //String temp =temperatureToString(dht.readTemperature());
-  //Serial.println(temp);
+  String value = pressureOrHumidityToString(dht.readHumidity());
   float temp = dht.readTemperature();
-  Serial.println(sizeof(temp));
-  Serial.println(temp);
-  Serial.println(temperatureToString(temp));
-  return pressureOrHumidityToString(dht.readHumidity());
-
+  return value;
 }
 
 String readBMP(){
   // floatToString(bmp.readTemperature()) + ";" +
-  bmp.readPressure();
+  bmp.readTemperature();
   return pressureOrHumidityToString(bmp.readPressure());
 }
 
-String temperatureToString(double x){
-  char buf[4];
-  String stringVal = "";
-  sprintf(buf, "%f", x);
-  
-  for(int i=0;i<sizeof(buf);i++){
-    stringVal+=buf[i];
-  }
-
-  Serial.println(stringVal);
-  return stringVal;
-}
 
 String pressureOrHumidityToString(double floatVal){
   char charVal[sizeof(floatVal)];
